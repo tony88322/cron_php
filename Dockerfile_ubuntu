@@ -1,0 +1,22 @@
+FROM ubuntu
+
+# 更改aliyun源
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./sources/ubuntu.aliyun.list /etc/apt/sources.list
+
+# 安装计划任务 vim
+RUN apt-get update
+RUN apt-get -y install cron
+
+# 创建测试文件
+RUN touch /var/log/cron.log
+
+# Run the command on container startup
+CMD cron && tail -f /var/log/cron.log
+
+# ADD ./entrypoints/cron.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
+COPY ./entrypoints/cron.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/cron.sh
+RUN ln -s /usr/local/bin/cron.sh /cron.sh
+ENTRYPOINT ["cron.sh"]
